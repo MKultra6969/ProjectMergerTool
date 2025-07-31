@@ -62,4 +62,5 @@ python ProjectMergerWeb.py
 ## P.s.
 
 **MKultra69**
-Создано с ненавистью, как всегда. Лицензия — WTFPL. DO WHAT THE FUCK YOU WANT.
+- Создано с ненавистью, как всегда. Лицензия — WTFPL. DO WHAT THE FUCK YOU WANT.
+- В коде куча говна, комменты, калл, возможно нечитаемый местами код, но мне как то всеравно.
