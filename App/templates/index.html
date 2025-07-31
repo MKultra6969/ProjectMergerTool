@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Merger Tool</title>
+
+    <!-- Подключение библиотек -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+
+    <!-- Стили -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+    <!-- ==================== ХЕДЕР ==================== -->
+    <header class="header">
+        <h1 data-translate-key="mainTitle">Склейка проекта</h1>
+        <div class="top-controls">
+            <div class="external-links">
+                <a href="https://github.com/MKultra6969" target="_blank" rel="noopener noreferrer" data-translate-key-title="githubLinkTitle" title="Мой GitHub">
+                    <i data-lucide="github"></i> <!-- Заменено на Lucide иконку -->
+                </a>
+                <a href="https://mk69.su" target="_blank" rel="noopener noreferrer" data-translate-key-title="websiteLinkTitle" title="Мой сайт">
+                    <i data-lucide="link"></i> <!-- Заменено на Lucide иконку -->
+                </a>
+            </div>
+            <div class="lang-switcher">
+                <button data-lang="ru" class="active">RU</button>
+                <button data-lang="en">EN</button>
+            </div>
+            <div class="theme-switcher">
+                <button id="theme-toggle">☀️</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- ==================== ОСНОВНОЙ КОНТЕЙНЕР ==================== -->
+    <div class="container">
+
+        <!-- === Основная колонка === -->
+        <main>
+            <!-- Панель сканирования -->
+            <div class="panel">
+                <h2 data-translate-key="scanTitle">Сканирование</h2>
+                <div class="controls">
+                    <input type="text" id="path-input" placeholder="Введите путь к проекту..." data-translate-key-placeholder="pathPlaceholder">
+                    <input type="file" id="folder-picker" webkitdirectory directory hidden>
+                    <button id="folder-picker-btn" data-translate-key="selectFolderBtn">Выбрать папку</button>
+                    <button id="scan-btn" data-translate-key="scanBtn">Сканировать</button>
+                </div>
+                <div class="scan-options">
+                    <label>
+                        <input type="checkbox" id="use-gitignore-checkbox" checked>
+                        <span data-translate-key="useGitignore">Учитывать .gitignore</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Панель с деревом проекта (появляется после сканирования) -->
+            <div id="project-view" class="panel hidden">
+                <h2 id="project-name"></h2>
+                <div id="file-tree"></div>
+            </div>
+
+            <!-- Панель с результатом (появляется после слияния) -->
+            <div id="result" class="panel hidden">
+                <h3 data-translate-key="done">Готово!</h3>
+                <a id="download-link" href="#" download data-translate-key="downloadLink">Скачать собранный файл</a>
+            </div>
+
+            <!-- Сообщение об ошибке (появляется при ошибке) -->
+            <div id="error-message" class="error hidden"></div>
+        </main>
+
+        <!-- === Сайдбар === -->
+        <aside class="sidebar">
+            <!-- Панель слияния -->
+            <div id="merge-panel" class="panel hidden">
+                <div class="export-options">
+                    <h3 data-translate-key="exportFormatTitle">Формат экспорта</h3>
+                    <div class="radio-group">
+                        <input type="radio" name="export-format" value="txt" id="format-txt" checked>
+                        <label for="format-txt">.txt</label>
+                        <input type="radio" name="export-format" value="md" id="format-md">
+                        <label for="format-md">.md</label>
+                    </div>
+                </div>
+                <div class="processing-options">
+                    <label>
+                        <input type="checkbox" id="remove-secrets-checkbox">
+                        <span data-translate-key="removeSecrets">Удалить секреты (ключи, токены)</span>
+                    </label>
+                    <label class="ai-clear-label">
+                        <input type="checkbox" id="clear-for-ai-checkbox">
+                        <span data-translate-key="clearForAI">Очистить для ИИ (убрать комменты и пустые строки)</span>
+                        <i data-lucide="sparkles" class="ai-icon"></i>
+                    </label>
+                </div>
+                <button id="merge-btn" data-translate-key="mergeBtn">Склеить выбранные файлы</button>
+            </div>
+
+            <!-- Панель исключений -->
+            <div class="panel">
+                <h2 data-translate-key="exclusionsTitle">Исключения</h2>
+                <div class="exclusions-editor">
+                    <label for="ignore-dirs" data-translate-key="ignoreDirs">Исключаемые директории:</label>
+                    <textarea id="ignore-dirs" rows="5"></textarea>
+
+                    <label for="ignore-files" data-translate-key="ignoreFiles">Исключаемые файлы:</label>
+                    <textarea id="ignore-files" rows="3"></textarea>
+
+                    <label for="ignore-exts" data-translate-key="ignoreExts">Исключаемые расширения:</label>
+                    <textarea id="ignore-exts" rows="4"></textarea>
+
+                    <button id="save-exclusions-btn" data-translate-key="saveExclusionsBtn">Сохранить исключения</button>
+                    <div id="exclusions-status"></div>
+                </div>
+            </div>
+        </aside>
+    </div>
+
+    <!-- ==================== ФУТЕР ==================== -->
+    <footer class="footer">
+        <p>© 2025 MKultra69 | WTFPL</p>
+    </footer>
+
+    <!-- ==================== СКРИПТЫ ==================== -->
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

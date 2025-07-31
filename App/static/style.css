@@ -1,0 +1,407 @@
+/* --- CSS-переменные для тем --- */
+:root {
+    --bg-color: #f0f2f5;
+    --panel-bg-color: #ffffff;
+    --text-color: #1c1e21;
+    --secondary-text-color: #606770;
+    --border-color: #dddfe2;
+    --accent-color: #007bff;
+    --accent-hover-color: #0056b3;
+    --success-color: #28a745;
+    --success-hover-color: #218838;
+    --success-bg-color: #e6ffed;
+    --error-color: #d93025;
+    --error-bg-color: #fbe9e7;
+    --input-bg-color: #f5f6f7;
+    --tree-hover-bg: #e7f3ff;
+    --shadow: 0 1px 2px rgba(0, 0, 0, 0.1), 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+html[data-theme='dark'] {
+    --bg-color: #18191a;
+    --panel-bg-color: #242526;
+    --text-color: #e4e6eb;
+    --secondary-text-color: #b0b3b8;
+    --border-color: #3e4042;
+    --accent-color: #2d88ff;
+    --accent-hover-color: #4a9aff;
+    --success-color: #34c759;
+    --success-hover-color: #52d973;
+    --success-bg-color: #2a3b2f;
+    --error-color: #ff453a;
+    --error-bg-color: #4b2826;
+    --input-bg-color: #3a3b3c;
+    --tree-hover-bg: #3a3b3c;
+}
+
+/* --- Базовые стили --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    margin: 0;
+    transition: background-color 0.2s, color 0.2s;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 0 20px;
+}
+
+@media (min-width: 992px) {
+    .container {
+        grid-template-columns: 1fr 320px;
+    }
+}
+
+
+main { display: flex; flex-direction: column; gap: 20px; }
+.sidebar { display: flex; flex-direction: column; gap: 20px; }
+
+.panel {
+    background-color: var(--panel-bg-color);
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: var(--shadow);
+    transition: background-color 0.2s;
+}
+
+h1, h2, h3 { color: var(--text-color); }
+h1 { font-size: 28px; margin: 0; }
+h2 { font-size: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 10px; margin-top: 0; }
+label { display: block; margin: 15px 0 5px; font-weight: 600; color: var(--secondary-text-color); }
+
+/* --- Хедер, футер и переключатели --- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    background-color: var(--panel-bg-color);
+    padding: 10px 20px;
+    box-shadow: var(--shadow);
+}
+
+@media (min-width: 768px) {
+    .header {
+        flex-wrap: nowrap;
+        padding: 10px 40px;
+    }
+}
+
+.top-controls { display: flex; align-items: center; gap: 15px; }
+.lang-switcher button, .theme-switcher button {
+    background: none;
+    border: 1px solid var(--border-color);
+    color: var(--secondary-text-color);
+    cursor: pointer;
+    transition: background-color 0.2s, color 0.2s;
+    min-width: 40px;
+    height: 40px;
+    padding: 5px 10px;
+}
+.lang-switcher button.active { background-color: var(--accent-color); color: white; border-color: var(--accent-color); }
+.lang-switcher button:first-child { border-radius: 5px 0 0 5px; }
+.lang-switcher button:last-child { border-radius: 0 5px 5px 0; border-left: none; }
+#theme-toggle { font-size: 20px; border-radius: 50%; width: 40px; height: 40px; display: flex; justify-content: center; align-items: center; padding: 0; }
+
+.external-links {
+    display: flex;
+    gap: 10px;
+    border-right: 1px solid var(--border-color);
+    padding-right: 15px;
+}
+.external-links a { color: var(--secondary-text-color); display: inline-block; transition: color 0.2s; }
+.external-links a:hover { color: var(--accent-color); }
+.external-links svg { width: 24px; height: 24px; vertical-align: middle; }
+
+.footer {
+    text-align: center;
+    padding: 20px;
+    margin-top: 40px;
+    background-color: var(--panel-bg-color);
+    color: var(--secondary-text-color);
+    font-size: 14px;
+    border-top: 1px solid var(--border-color);
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.05);
+    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
+}
+
+/* --- Элементы управления --- */
+.controls { display: flex; flex-wrap: wrap; gap: 10px; }
+input[type="text"] {
+    flex-grow: 1;
+    min-width: 200px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 16px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+}
+button {
+    padding: 10px 20px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #fff;
+    background-color: var(--accent-color);
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+button:hover { background-color: var(--accent-hover-color); }
+#merge-btn { background-color: var(--success-color); }
+#merge-btn:hover { background-color: var(--success-hover-color); }
+
+/* --- Дерево файлов --- */
+#file-tree {
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px;
+    /* Убираем левый отступ, так как рамки будут внутри */
+    padding-left: 0;
+}
+#file-tree ul {
+    list-style-type: none;
+    padding-left: 20px;
+    margin: 0; /* Убираем вертикальные отступы у списка */
+    position: relative;
+}
+/* Вертикальная линия для каждого уровня вложенности */
+#file-tree ul::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 9px;
+    width: 1px;
+    background-color: var(--border-color);
+}
+
+#file-tree li {
+    position: relative;
+}
+/* Горизонтальная линия от вертикальной до элемента */
+#file-tree li::before {
+    content: '';
+    position: absolute;
+    top: 21px; /* Скорректировано под новый размер элемента */
+    left: -10px;
+    width: 10px;
+    height: 1px;
+    background-color: var(--border-color);
+}
+
+/*
+--- ОСНОВНЫЕ ИЗМЕНЕНИЯ ЗДЕСЬ ---
+*/
+#file-tree .tree-item {
+    display: flex;
+    align-items: center;
+    /* ИЗМЕНЕНИЕ: Увеличиваем отступы для высоты строки */
+    padding: 8px;
+    border-radius: 0; /* Убираем скругление, т.к. теперь это строка */
+
+    /* ИЗМЕНЕНИЕ: Добавляем нижнюю границу для разделения */
+    border-bottom: 1px solid var(--border-color);
+}
+
+/* ИЗМЕНЕНИЕ: Убираем границу у последнего элемента в списке, чтобы не было двойной рамки с панелью */
+#file-tree li:last-child > .tree-item {
+    border-bottom: none;
+}
+
+
+#file-tree .tree-item:hover {
+    background-color: var(--tree-hover-bg);
+}
+#file-tree .tree-item input[type="checkbox"] {
+    margin-right: 8px;
+    flex-shrink: 0;
+    accent-color: var(--accent-color);
+}
+#file-tree .lucide {
+    width: 18px;
+    height: 18px;
+    margin-right: 8px;
+    color: var(--secondary-text-color);
+    flex-shrink: 0; /* Важно, чтобы иконки не сжимались */
+}
+#file-tree .item-name {
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+#file-tree .dir-item > .tree-item > .item-name {
+    font-weight: 600;
+}
+#file-tree .toggler {
+    cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--secondary-text-color);
+    font-size: 12px;
+    background-color: var(--panel-bg-color);
+    transition: background-color 0.2s;
+}
+#file-tree .toggler::before {
+    content: '▼';
+    display: inline-block;
+    transition: transform 0.1s;
+}
+#file-tree .collapsed > .tree-item .toggler::before {
+    transform: rotate(-90deg);
+}
+#file-tree .collapsed > ul {
+    display: none;
+}
+
+/* Убираем лишние линии структуры */
+#file-tree > ul::before {
+    display: none;
+}
+#file-tree li:last-child > ul::before {
+    bottom: auto;
+    height: 21px; /* Скорректировано под новый размер элемента */
+}
+
+/* --- Редактор исключений --- */
+.exclusions-editor textarea {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 8px;
+    border: 1px solid var(--border-color);
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: var(--input-bg-color);
+    color: var(--text-color);
+    resize: vertical;
+}
+#save-exclusions-btn { width: 100%; margin-top: 15px; }
+#exclusions-status { margin-top: 10px; font-size: 14px; text-align: center; height: 1em; }
+
+/* --- Сообщения --- */
+#result { border: 1px solid var(--success-color); background-color: var(--success-bg-color); }
+#download-link { color: var(--success-color); font-weight: bold; }
+.error { color: var(--error-color); border: 1px solid var(--error-color); background: var(--error-bg-color); padding: 15px; border-radius: 5px; }
+.hidden { display: none; }
+
+.scan-options {
+    margin-top: 15px;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+}
+.scan-options label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: normal;
+    color: var(--text-color);
+}
+.scan-options input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: var(--accent-color);
+}
+
+/* --- Стили для кнопки "Склеить" в сайдбаре --- */
+#merge-panel .panel {
+    padding: 0; /* Убираем лишний паддинг, если он не нужен */
+}
+
+#merge-btn {
+    width: 100%; /* Растягиваем на всю ширину панели */
+    padding: 12px 20px;
+    font-size: 17px;
+    margin: 0; /* Убираем лишние отступы */
+}
+
+/* --- Стили для выбора формата экспорта --- */
+.export-options {
+    margin-bottom: 20px;
+}
+
+.export-options h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: var(--secondary-text-color);
+    border: none;
+}
+
+.radio-group {
+    display: flex;
+    gap: 5px; /* Уменьшим разрыв между элементами */
+    background-color: var(--input-bg-color);
+    border-radius: 5px;
+    padding: 5px;
+    border: 1px solid var(--border-color); /* Добавим рамку для лучшего вида */
+}
+
+/* ИЗМЕНЕННЫЙ СЕЛЕКТОР */
+.radio-group label {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: background-color 0.2s, color 0.2s;
+    margin: 0;
+    color: var(--text-color);
+    font-weight: 500; /* Немного изменим вес шрифта */
+}
+
+.radio-group input[type="radio"] {
+    display: none;
+}
+
+/* ИЗМЕНЕННЫЙ СЕЛЕКТОР */
+.radio-group input[type="radio"]:checked + label {
+    background-color: var(--accent-color);
+    color: #fff;
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+/* --- Стили для опций обработки --- */
+.processing-options {
+    margin-bottom: 20px;
+}
+
+.processing-options label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: normal;
+    color: var(--text-color);
+}
+
+.processing-options input[type="checkbox"] {
+    margin-right: 8px;
+    accent-color: var(--accent-color);
+}
+
+/* ... в конец файла ... */
+.ai-clear-label {
+    margin-top: 10px;
+    padding: 8px;
+    border: 1px solid var(--accent-color);
+    border-radius: 5px;
+    background-color: color-mix(in srgb, var(--accent-color) 10%, transparent);
+}
+
+.ai-clear-label .ai-icon {
+    margin-left: auto;
+    color: var(--accent-color);
+}
+
