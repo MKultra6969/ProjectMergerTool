@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // --- DOM Элементы ---
     const getEl = (id) => document.getElementById(id);
+    const loaderOverlay = getEl('loader-overlay');
     const mergePanel = getEl('merge-panel');
     const scanBtn = getEl('scan-btn');
     const mergeBtn = getEl('merge-btn');
@@ -282,24 +283,26 @@ function renderTree(nodes, container) {
         }
     });
 
-    // --- Кнопка Склеить ---
-    mergeBtn.addEventListener('click', async () => {
-        const checkedFiles = [];
-        fileTreeContainer.querySelectorAll('li.file-item').forEach(li => {
-            if (li.querySelector(':scope > .tree-item > input[type="checkbox"]').checked) {
-                checkedFiles.push(li.dataset.path);
-            }
-        });
-
-        if (checkedFiles.length === 0) {
-            alert('Выберите хотя бы один файл.');
-            return;
+mergeBtn.addEventListener('click', async () => {
+    const checkedFiles = [];
+    fileTreeContainer.querySelectorAll('li.file-item').forEach(li => {
+        if (li.querySelector(':scope > .tree-item > input[type="checkbox"]').checked) {
+            checkedFiles.push(li.dataset.path);
         }
+    });
 
-            const exportFormat = document.querySelector('input[name="export-format"]:checked').value;
-            const currentLang = localStorage.getItem('pmt-lang') || 'ru';
-            const removeSecrets = getEl('remove-secrets-checkbox').checked;
-            const clearForAI = getEl('clear-for-ai-checkbox').checked;
+    if (checkedFiles.length === 0) {
+        alert('Выберите хотя бы один файл.');
+        return;
+    }
+
+    const exportFormat = document.querySelector('input[name="export-format"]:checked').value;
+    const currentLang = localStorage.getItem('pmt-lang') || 'ru';
+    const removeSecrets = getEl('remove-secrets-checkbox').checked;
+    const clearForAI = getEl('clear-for-ai-checkbox').checked;
+
+    loaderOverlay.classList.add('visible');
+    mergeBtn.disabled = true;
 
     try {
         const response = await fetch('/merge', {
@@ -314,22 +317,25 @@ function renderTree(nodes, container) {
                 clear_for_ai: clearForAI
             })
         });
-            const data = await response.json();
+        const data = await response.json();
 
-            if (response.ok && data.success) {
-                downloadLink.href = data.download_url;
-                resultView.classList.remove('hidden');
-                resultView.scrollIntoView({ behavior: 'smooth' });
-                triggerConfetti();
-            } else {
-                errorDiv.textContent = data.error || 'Ошибка при склейке файлов.';
-                errorDiv.classList.remove('hidden');
-            }
-        } catch (error) {
-            errorDiv.textContent = 'Ошибка сети или сервера.';
+        if (response.ok && data.success) {
+            downloadLink.href = data.download_url;
+            resultView.classList.remove('hidden');
+            resultView.scrollIntoView({ behavior: 'smooth' });
+            triggerConfetti();
+        } else {
+            errorDiv.textContent = data.error || 'Ошибка при склейке файлов.';
             errorDiv.classList.remove('hidden');
         }
-    });
+    } catch (error) {
+        errorDiv.textContent = 'Ошибка сети или сервера.';
+        errorDiv.classList.remove('hidden');
+    } finally {
+        loaderOverlay.classList.remove('visible');
+        mergeBtn.disabled = false;
+    }
+});
 
     // --- Выбор папки ---
     folderPickerBtn.addEventListener('click', () => folderPicker.click());
@@ -343,8 +349,6 @@ function renderTree(nodes, container) {
                     pathInput.value = pathParts[0];
                  }
             } else {
-                 // Fallback for browsers not supporting webkitRelativePath fully
-                 // This is tricky and often not possible for security reasons
                  alert("Your browser doesn't fully support folder selection this way. Please enter the path manually.");
             }
         }
