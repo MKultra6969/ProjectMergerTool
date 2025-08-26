@@ -4,12 +4,8 @@ import json
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify
 import pathspec
-
-# --- Инициализация Flask ---
 app = Flask(__name__, static_folder='static', template_folder='templates')
 
-# --- Списки исключений (теперь они не константы) ---
-# Мы загрузим их из файла или используем дефолтные
 exclusions = {}
 exclusions_file = Path("merger_exclusions.json")
 
@@ -41,7 +37,6 @@ def save_exclusions():
     exclusions_file.write_text(json.dumps(exclusions, indent=4, ensure_ascii=False), encoding="utf-8")
 
 
-# --- Логика сканирования и построения дерева ---
 def build_file_tree(dir_path: Path, project_root: Path, gitignore_spec: pathspec.PathSpec | None):
     tree = []
     ignore_dirs_set = set(exclusions["dirs"])
@@ -133,12 +128,7 @@ FILE_CONTENT_TRANSLATIONS = {
     }
 }
 
-
-# <--- УНКЦИЯ УДАЛЕНИЯ СЕКРЕТОВ ---
 def sanitize_content(content: str) -> str:
-    """
-    Удаляет потенциальные секреты из текстового контента с помощью регулярных выражений.
-    """
     patterns = [
         (r"""(['"]?((?:api|access|secret|private)_?(?:key|token)|token|password)['"]?\s*[:=]\s*)['"][^'"]*['"]""",
          r'\1"[SECRET REMOVED]"'),
@@ -151,8 +141,6 @@ def sanitize_content(content: str) -> str:
 
     return sanitized_content
 
-
-# <--- ФУНКЦИЯ ОЧИСТКИ ДЛЯ ИИ ---
 def clear_for_ai(content: str, file_extension: str) -> str:
 
     line_comment_patterns = {
@@ -199,8 +187,6 @@ def clear_for_ai(content: str, file_extension: str) -> str:
 
     return content.strip()
 
-# --- Маршруты (эндпоинты) ---
-
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -230,90 +216,113 @@ def scan_directory():
     return jsonify({"tree": tree, "project_name": project_path.name, "project_path": str(project_path)})
 
 
-# <---   /merge ---
-
-
 @app.route('/merge', methods=['POST'])
 def merge_files():
     data = request.json
     files_to_merge = data.get('files', [])
     project_path_str = data.get('project_path', '.')
+    project_name = Path(project_path_str).name
     export_format = data.get('format', 'txt')
     lang = data.get('lang', 'ru')
     remove_secrets = data.get('remove_secrets', False)
-    clear_for_ai_flag = data.get('clear_for_ai', False)  # Получаем новый флаг
+    clear_for_ai_flag = data.get('clear_for_ai', False)
 
     T = FILE_CONTENT_TRANSLATIONS.get(lang, FILE_CONTENT_TRANSLATIONS['ru'])
 
-    project_path = Path(project_path_str)
-    output_filename = f"merged_project.{export_format}"
+    output_filename = f"{project_name}.{export_format}"
     output_filepath = Path(app.static_folder) / output_filename
 
-    file_tree_str = generate_text_tree(project_path, files_to_merge)
+    file_tree_str = generate_text_tree(files_to_merge)
 
     try:
-        with open(output_filepath, "w", encoding="utf-8", errors="ignore") as f:
-            # ... (запись заголовка файла без изменений) ...
-            if export_format == 'md':
-                f.write(f"# {T['project_build']}: {project_path.name}\n\n")
-                f.write(f"## {T['project_structure']}\n\n")
-                f.write("```\n")
-                f.write(file_tree_str + "\n")
-                f.write("```\n\n")
-                f.write(f"## {T['file_contents']}\n\n")
-            else:
-                f.write(f"{T['project_build']}: {project_path.name}\n")
-                f.write("=" * 80 + "\n")
-                f.write(f"{T['project_structure']}\n")
-                f.write("=" * 80 + "\n\n")
-                f.write(file_tree_str + "\n\n")
-                f.write("=" * 80 + "\n")
-                f.write(f"{T['file_contents']}\n")
-                f.write("=" * 80 + "\n\n")
+        if export_format == 'pdf':
+            print("[INFO] PDF export selected. Importing WeasyPrint and Pygments...")
+            from weasyprint import HTML
+            from pygments import highlight
+            from pygments.lexers import get_lexer_for_filename, TextLexer
+            from pygments.formatters import HtmlFormatter
+            print("[SUCCESS] Libraries imported.")
 
-            # Содержимое файлов
+            pygments_css = HtmlFormatter(style='default').get_style_defs('.highlight')
+            html_parts = [
+                '<!DOCTYPE html>', '<html lang="en">', '<head><meta charset="UTF-8">',
+                f'<title>{T["project_build"]}: {project_name}</title>',
+                '<style>', 'body { font-family: sans-serif; }', 'h1, h2, h3 { color: #333; }',
+                'pre { white-space: pre-wrap; word-wrap: break-word; background-color: #f8f8f8; border: 1px solid #ddd; padding: 10px; border-radius: 5px; }',
+                'code { font-family: monospace; }', pygments_css, '</style>', '</head><body>',
+                f'<h1>{T["project_build"]}: {project_name}</h1>', f'<h2>{T["project_structure"]}</h2>',
+                f'<pre><code>{file_tree_str}</code></pre>', f'<h2>{T["file_contents"]}</h2>'
+            ]
             for file_rel_path_str in sorted(files_to_merge):
-                file_rel_path = Path(file_rel_path_str)
-                file_abs_path = (project_path / file_rel_path).resolve()
-
-                if project_path not in file_abs_path.parents and file_abs_path.parent != project_path:
-                    continue
-
+                file_abs_path = Path(project_path_str) / file_rel_path_str
                 try:
                     file_content = file_abs_path.read_text(encoding="utf-8")
-
-                    # --- ОБНОВЛЕННАЯ ЛОГИКА ОБРАБОТКИ ---
                     if clear_for_ai_flag:
-                        # Очистка для ИИ включает удаление секретов
                         content_sanitized = sanitize_content(file_content)
-                        file_content = clear_for_ai(content_sanitized, file_rel_path.suffix)
+                        file_content = clear_for_ai(content_sanitized, file_abs_path.suffix)
                     elif remove_secrets:
                         file_content = sanitize_content(file_content)
-                    # --- КОНЕЦ ОБНОВЛЕННОЙ ЛОГИКИ ---
-
+                    if not file_content: continue
+                    try:
+                        lexer = get_lexer_for_filename(file_rel_path_str, stripall=True)
+                    except Exception:
+                        lexer = TextLexer()
+                    formatter = HtmlFormatter(linenos=True, cssclass="highlight")
+                    highlighted_code = highlight(file_content, lexer, formatter)
+                    html_parts.append(f'<h3><code>--- {T["file_header"]}: {file_rel_path_str} ---</code></h3>')
+                    html_parts.append(highlighted_code)
                 except Exception as e:
-                    file_content = f"[{T['read_error']}: {e}]"
+                    html_parts.append(f'<h3><code>--- {T["file_header"]}: {file_rel_path_str} ---</code></h3>')
+                    html_parts.append(f'<pre>[{T["read_error"]}: {e}]</pre>')
+            html_parts.append('</body></html>')
+            final_html = "".join(html_parts)
+            print("[INFO] HTML generated. Starting PDF conversion...")
+            HTML(string=final_html).write_pdf(output_filepath)
+            print("[SUCCESS] PDF file written successfully.")
 
-                # Записываем финальное содержимое
-                if file_content:  # Не записываем пустые файлы после очистки
-                    if export_format == 'md':
-                        lang_tag = LANG_MAP.get(file_rel_path.suffix, '')
-                        f.write(f"### `--- {T['file_header']}: {file_rel_path_str} ---`\n\n")
-                        f.write(f"```{lang_tag}\n")
-                        f.write(file_content)
-                        f.write("\n```\n\n")
-                    else:
-                        f.write(f"--- {T['file_header']}: {file_rel_path_str} ---\n\n")
-                        f.write(file_content)
-                        f.write("\n\n" + "=" * 80 + "\n\n")
+        else:
+            print(f"[INFO] {export_format.upper()} export selected. Starting file write...")
+            with open(output_filepath, "w", encoding="utf-8", errors="ignore") as f:
+                if export_format == 'md':
+                    f.write(
+                        f"# {T['project_build']}: {project_name}\n\n## {T['project_structure']}\n\n```\n{file_tree_str}\n```\n\n## {T['file_contents']}\n\n")
+                else:
+                    f.write(
+                        f"{T['project_build']}: {project_name}\n{'=' * 80}\n{T['project_structure']}\n{'=' * 80}\n\n{file_tree_str}\n\n{'=' * 80}\n{T['file_contents']}\n{'=' * 80}\n\n")
+                for file_rel_path_str in sorted(files_to_merge):
+                    file_rel_path = Path(file_rel_path_str)
+                    file_abs_path = (Path(project_path_str) / file_rel_path).resolve()
+                    try:
+                        file_content = file_abs_path.read_text(encoding="utf-8")
+                        if clear_for_ai_flag:
+                            content_sanitized = sanitize_content(file_content)
+                            file_content = clear_for_ai(content_sanitized, file_rel_path.suffix)
+                        elif remove_secrets:
+                            file_content = sanitize_content(file_content)
+                    except Exception as e:
+                        file_content = f"[{T['read_error']}: {e}]"
+                    if file_content:
+                        if export_format == 'md':
+                            lang_tag = LANG_MAP.get(file_rel_path.suffix, '')
+                            f.write(
+                                f"### `--- {T['file_header']}: {file_rel_path_str} ---`\n\n```{lang_tag}\n{file_content}\n```\n\n")
+                        else:
+                            f.write(
+                                f"--- {T['file_header']}: {file_rel_path_str} ---\n\n{file_content}\n\n{'=' * 80}\n\n")
+            print(f"[SUCCESS] {export_format.upper()} file written successfully.")
 
-        return jsonify({"success": True, "download_url": f"/static/{output_filename}"})
+        response_data = {"success": True, "download_url": f"/static/{output_filename}"}
+        print(f"[DEBUG] Sending response: {response_data}")
+        return jsonify(response_data)
 
-    except IOError as e:
-        return jsonify({"error": f"Ошибка записи в файл: {e}"}), 500
+    except Exception as e:
+        print(f"[ERROR] An error occurred during merge: {e}", flush=True)
+        import traceback
+        traceback.print_exc()
+        return jsonify({"error": f"Ошибка создания файла: {str(e)}"}), 500
 
 
-def generate_text_tree(project_path, selected_files):
+def generate_text_tree(selected_files):
     tree = {}
     for path_str in selected_files:
         parts = Path(path_str).parts

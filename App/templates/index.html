@@ -76,7 +76,6 @@
 
         <!-- === Сайдбар === -->
         <aside class="sidebar">
-            <!-- Панель слияния -->
             <div id="merge-panel" class="panel hidden">
                 <div class="export-options">
                     <h3 data-translate-key="exportFormatTitle">Формат экспорта</h3>
@@ -85,6 +84,8 @@
                         <label for="format-txt">.txt</label>
                         <input type="radio" name="export-format" value="md" id="format-md">
                         <label for="format-md">.md</label>
+                        <input type="radio" name="export-format" value="pdf" id="format-pdf">
+                        <label for="format-pdf">.pdf</label>
                     </div>
                 </div>
                 <div class="processing-options">
@@ -101,7 +102,6 @@
                 <button id="merge-btn" data-translate-key="mergeBtn">Склеить выбранные файлы</button>
             </div>
 
-            <!-- Панель исключений -->
             <div class="panel">
                 <h2 data-translate-key="exclusionsTitle">Исключения</h2>
                 <div class="exclusions-editor">
@@ -128,5 +128,10 @@
 
     <!-- ==================== СКРИПТЫ ==================== -->
     <script src="{{ url_for('static', filename='script.js') }}"></script>
+
+<div id="loader-overlay">
+    <div class="loader"></div>
+</div>
+
 </body>
 </html>

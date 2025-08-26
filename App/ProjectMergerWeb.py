@@ -7,14 +7,13 @@ import time
 import os
 
 # --- Конфигурация ---
-REQUIREMENTS = ["Flask", "pathspec"]
+REQUIREMENTS = ["Flask", "pathspec", "WeasyPrint", "Pygments"]
 APP_FILE = "app.py"
 URL = "http://127.0.0.1:5000"
 VENV_DIR = "venv"
 
 
 def print_banner():
-    """Выводит красивый баннер в консоль."""
     banner = r"""
 
  ██▓███   ███▄ ▄███▓▄▄▄█████▓ █     █░
@@ -30,13 +29,12 @@ def print_banner():
     """
     print(banner)
     print("=" * 70)
-    print("Project Merger Tool - Web Launcher by MKultra69")
+    print("Project Merger Tool - Web Launcher by MKultra69 ver.0.5")
     print("=" * 70)
     print()
 
 
 def get_venv_python_path():
-    """Возвращает путь к исполняемому файлу Python внутри venv."""
     if sys.platform == "win32":
         return Path(VENV_DIR) / "Scripts" / "python.exe"
     else:
@@ -44,10 +42,6 @@ def get_venv_python_path():
 
 
 def setup_environment():
-    """
-    Проверяет наличие venv и зависимостей. Создает и устанавливает их при необходимости.
-    Возвращает True, если окружение готово к запуску, иначе False.
-    """
     venv_path = Path(VENV_DIR)
     install_marker = venv_path / ".install_complete"
 
@@ -73,7 +67,6 @@ def setup_environment():
     try:
         for package in REQUIREMENTS:
             print(f"[*] Установка {package}...")
-            # Используем pip из venv
             subprocess.check_call([str(python_in_venv), "-m", "pip", "install", package],
                                   stdout=subprocess.DEVNULL,
                                   stderr=subprocess.STDOUT)
@@ -86,13 +79,11 @@ def setup_environment():
 
 
 def open_browser():
-    """Открывает веб-браузер по заданному URL в новой вкладке."""
     print(f"[INFO] Открываю {URL} в вашем браузере...")
     webbrowser.open_new_tab(URL)
 
 
 def start_app():
-    """Запускает основное Flask-приложение, используя Python из venv."""
     app_path = Path(APP_FILE)
     if not app_path.exists():
         print(f"[ERROR] Основной файл приложения '{APP_FILE}' не найден!")
@@ -117,7 +108,6 @@ def start_app():
 
 
 def main():
-    """Основная логика лаунчера."""
     print_banner()
 
     if setup_environment():
