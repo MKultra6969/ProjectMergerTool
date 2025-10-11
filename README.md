@@ -1,4 +1,5 @@
 # ProjectMergerTool — Web Edition
+<img width="1919" height="907" alt="изображение" src="https://github.com/user-attachments/assets/2f29cfee-8fa2-4733-8e13-69eb37bd7b00" />
 
 > Склеивает твой проект в один файл для скармливания нейросетям. Теперь с блэкджеком и веб-интерфейсом.
 
